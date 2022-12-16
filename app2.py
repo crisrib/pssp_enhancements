@@ -7,16 +7,17 @@ import uuid
 
 load_dotenv()
 
-mysql_username = os.getenv("MYSQL_USERNAME")
-mysql_password = os.getenv("MYSQL_PASSWORD")
-mysql_host = os.getenv("MYSQL_HOST")
+MYSQL_USERNAME = os.getenv("MYSQL_USERNAME")
+MYSQL_PASSWORD = os.getenv("MYSQL_PASSWORD")
+MYSQL_HOST = os.getenv("MYSQL_HOST")
+MYSQL_DATABASE = os.getenv("MYSQL_DATABASE")
 
 db = SQLAlchemy()
 app = Flask(__name__)
 
-app.config['SQLALCHEMY_DATABASE_URI'] = 'mysql+mysqldb://' + mysql_username + ':' + mysql_password + '@' + mysql_host + ':3306/patient_portal'
+app.config['SQLALCHEMY_DATABASE_URI'] = 'mysql+pymysql://' + MYSQL_USERNAME + ':' + MYSQL_PASSWORD + '@' + MYSQL_HOST + ':3306/patients'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
-app.secret_key = 'sdf#$#dfjkhdf0SDJH0df9fd98343fdfu34rf'
+app.secret_key = 'iegrfiuerh38364%@g74'
 
 db.init_app(app)
 
@@ -69,7 +70,7 @@ class Patients(db.Model):
     contact_mobile = db.Column(db.String(255), nullable=True)
     contact_home = db.Column(db.String(255), nullable=True)
 
-    # this first function __init__ is to establish the class for python GUI
+    # 1st function __init__ is to establish the class for python GUI
     def __init__(self, mrn, first_name, last_name, zip_code, dob, gender, contact_mobile, contact_home):
         self.mrn = mrn
         self.first_name = first_name
@@ -80,11 +81,9 @@ class Patients(db.Model):
         self.contact_mobile = contact_mobile
         self.contact_home = contact_home
 
-
-    # this second function is for the API endpoints to return JSON 
+    # 2nd function is for the API endpoints to return JSON 
     def to_json(self):
-        return {
-            'id': self.id,
+        return {'id': self.id,
             'mrn': self.mrn,
             'first_name': self.first_name,
             'last_name': self.last_name,
@@ -92,97 +91,81 @@ class Patients(db.Model):
             'dob': self.dob,
             'gender': self.gender,
             'contact_mobile': self.contact_mobile,
-            'contact_home': self.contact_home
-        }
+            'contact_home': self.contact_home}
 
 class Conditions_patient(db.Model):
     __tablename__ = 'production_patient_conditions'
-
     id = db.Column(db.Integer, primary_key=True)
     mrn = db.Column(db.String(255), db.ForeignKey('production_patients.mrn'))
     icd10_code = db.Column(db.String(255), db.ForeignKey('production_conditions.icd10_code'))
 
-    # this first function __init__ is to establish the class for python GUI
+    # 1st function __init__ is to establish the class for python GUI
     def __init__(self, mrn, icd10_code):
         self.mrn = mrn
         self.icd10_code = icd10_code
 
-    # this second function is for the API endpoints to return JSON
+    # 2nd function is for the API endpoints to return JSON
     def to_json(self):
-        return {
-            'id': self.id,
+        return {'id': self.id,
             'mrn': self.mrn,
-            'icd10_code': self.icd10_code
-        }
+            'icd10_code': self.icd10_code}
 
 class Conditions(db.Model):
     __tablename__ = 'production_conditions'
-
     id = db.Column(db.Integer, primary_key=True)
     icd10_code = db.Column(db.String(255))
     icd10_description = db.Column(db.String(255))
 
-    # this first function __init__ is to establish the class for python GUI
+    # 1st function __init__ is to establish the class for python GUI
     def __init__(self, icd10_code, icd10_description):
         self.icd10_code = icd10_code
         self.icd10_description = icd10_description
 
-    # this second function is for the API endpoints to return JSON
+    # 2nd function is for the API endpoints to return JSON
     def to_json(self):
-        return {
-            'id': self.id,
+        return {'id': self.id,
             'icd10_code': self.icd10_code,
-            'icd10_description': self.icd10_description
-        }
+            'icd10_description': self.icd10_description}
 
 class Medications_patient(db.Model):
     __tablename__ = 'production_patient_medications'
-
     id = db.Column(db.Integer, primary_key=True)
     mrn = db.Column(db.String(255), db.ForeignKey('production_patients.mrn'))
     med_ndc = db.Column(db.String(255), db.ForeignKey('production_medications.med_ndc'))
 
-    # this first function __init__ is to establish the class for python GUI
+    # 1st function __init__ is to establish the class for python GUI
     def __init__(self, mrn, med_ndc):
         self.mrn = mrn
         self.med_ndc = med_ndc
 
-    # this second function is for the API endpoints to return JSON
+    # 2nd function is for the API endpoints to return JSON
     def to_json(self):
-        return {
-            'id': self.id,
+        return {'id': self.id,
             'mrn': self.mrn,
-            'med_ndc': self.med_ndc
-        }
+            'med_ndc': self.med_ndc}
     
 class Medications(db.Model):
     __tablename__ = 'production_medications'
-
     id = db.Column(db.Integer, primary_key=True)
     med_ndc = db.Column(db.String(255))
     med_human_name = db.Column(db.String(255))
 
-    # this first function __init__ is to establish the class for python GUI
+    # 1st function __init__ is to establish the class for python GUI
     def __init__(self, med_ndc, med_human_name):
         self.med_ndc = med_ndc
         self.med_human_name = med_human_name
 
-    # this second function is for the API endpoints to return JSON
+    # 2nd function is for the API endpoints to return JSON
     def to_json(self):
-        return {
-            'id': self.id,
+        return {'id': self.id,
             'med_ndc': self.med_ndc,
-            'med_human_name': self.med_human_name
-        }
+            'med_human_name': self.med_human_name}
 
-
-
-#### BASIC ROUTES WITHOUT DATA PULSL FOR NOW ####
+# Basic routes without data PULSL for now
 @app.route('/')
 def index():
     return render_template('landing.html')
-
-
+### ! ###
 @app.route('/login', methods=['GET', 'POST'])
 def login():
     msg = ''
@@ -209,7 +192,6 @@ def login():
             msg = 'Incorrect username / password !'
     return render_template('/login.html', msg = msg)
 
-
 @app.route('/register', methods=['GET', 'POST'])
 def register():
     msg = ''
@@ -225,7 +207,6 @@ def register():
         msg = 'Please fill out the form!'
     # Show registration form with message (if any)
     return render_template('register.html', msg=msg)
-
 
 @app.route('/register/admin', methods=['GET', 'POST'])
 def register_admin():
@@ -255,7 +236,6 @@ def register_admin():
         msg = 'Please fill out the form!'
     # Show registration form with message (if any)
     return render_template('register_admin.html', msg=msg)
-
 
 @app.route('/register/patient', methods=['GET', 'POST'])
 def register_patient():
@@ -321,8 +301,6 @@ def register_patient():
         msg = 'Please fill out the form!'
     # Show registration form with message (if any)
     return render_template('register_patient.html', msg=msg, conditions=db_conditions, medications=db_medications)
-
-
 
 @app.route('/account')
 def account():
